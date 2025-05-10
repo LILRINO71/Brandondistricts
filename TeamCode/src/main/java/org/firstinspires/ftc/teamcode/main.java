@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp
 public class main extends LinearOpMode {
-
     DcMotor arm, fR, fL, bL, bR, wrist;
     Servo leftClaw, rightClaw, leftClip, rightClip;
     BNO055IMU imu;
