@@ -5,7 +5,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -155,10 +154,10 @@ public class main extends LinearOpMode {
 
             //claw
             if (gamepad2.a) {
-                leftClaw.setPosition(0);//open
-                rightClaw.setPosition(0);
-            } else {
                 leftClaw.setPosition(0.5);//close
+                rightClaw.setPosition(0.5);
+            } else {
+                leftClaw.setPosition(0.5);//open
                 rightClaw.setPosition(0.5);
             }
 
