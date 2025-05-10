@@ -6,6 +6,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -17,36 +18,38 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class main extends LinearOpMode {
     RevBlinkinLedDriver Lights;
-    DcMotor lift1, FR, FL, BL, BR,lift2,Power;
-    Servo Srotate,Srotate2, intake,slide1,slide2,claw,bucket;
+    DcMotor arm, fR, fL, bL, bR, wrist;
+    Servo leftClaw, rightClaw, leftClip, rightClip;
     BNO055IMU imu;
     @Override
     public void runOpMode() {
         // Declare our motors
         // Make sure your ID's match your configuration
-        Lights = hardwareMap.get(RevBlinkinLedDriver.class, "blinkin");
-        Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.YELLOW);
-        BR = hardwareMap.dcMotor.get("BR"); //3
-        BL = hardwareMap.dcMotor.get("BL");
-        FR = hardwareMap.dcMotor.get("FR");
-        FL = hardwareMap.dcMotor.get("FL");
-        lift2 = hardwareMap.dcMotor.get("lift2");
-        lift1 = hardwareMap.dcMotor.get("lift1");
-        intake = hardwareMap.servo.get("intake"); //
-        Srotate = hardwareMap.servo.get("Srotate");
-        Srotate2 = hardwareMap.servo.get("Srotate2");
-        slide1 = hardwareMap.servo.get("slide1");
-        slide2 = hardwareMap.servo.get("slide2");
-        claw = hardwareMap.servo.get("claw");
-        bucket = hardwareMap.servo.get("bucket");
+        bR = hardwareMap.dcMotor.get("bR");
+        bL = hardwareMap.dcMotor.get("bL");
+        fR = hardwareMap.dcMotor.get("fR");
+        fL = hardwareMap.dcMotor.get("fL");
+        wrist = hardwareMap.dcMotor.get("wrist");
+        arm = hardwareMap.dcMotor.get("arm");
+        leftClaw = hardwareMap.servo.get("leftClaw");
+        rightClaw = hardwareMap.servo.get("rightClip");
+        leftClip = hardwareMap.servo.get("leftClip");
+        rightClip = hardwareMap.servo.get("rightClip");
 
 
-        FR.setDirection(DcMotor.Direction.REVERSE);
-        FL.setDirection(DcMotor.Direction.FORWARD);
-        BR.setDirection(DcMotor.Direction.REVERSE);
-        BL.setDirection(DcMotor.Direction.FORWARD);
-        lift2.setDirection(DcMotor.Direction.FORWARD);
-        lift1.setDirection(DcMotor.Direction.REVERSE);
+        fR.setDirection(DcMotor.Direction.REVERSE);
+        fL.setDirection(DcMotor.Direction.FORWARD);
+        bR.setDirection(DcMotor.Direction.REVERSE);
+        bL.setDirection(DcMotor.Direction.FORWARD);
+        wrist.setDirection(DcMotor.Direction.FORWARD);
+        arm.setDirection(DcMotor.Direction.FORWARD);
+
+        fR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Deadline gamepadRateLimit = new Deadline(500, TimeUnit.MILLISECONDS);
 
@@ -61,7 +64,6 @@ public class main extends LinearOpMode {
 
 
         waitForStart();
-        Lights.setPattern(RevBlinkinLedDriver.BlinkinPattern.GRAY);
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
@@ -73,7 +75,7 @@ public class main extends LinearOpMode {
 
             double drivePower = 1 - (0.8 * gamepad1.right_trigger);
 
-            if (gamepadRateLimit.hasExpired() && gamepad1.a) {
+            if (gamepadRateLimit.hasExpired() && gamepad1.options) {
                 imu.resetYaw();
                 gamepadRateLimit.reset();
             }
@@ -82,68 +84,93 @@ public class main extends LinearOpMode {
             double adjustedLx = -ly * Math.sin(heading) + lx * Math.cos(heading);
             double adjustedLy = ly * Math.cos(heading) + lx * Math.sin(heading);
 
-            BR.setPower(((adjustedLy - adjustedLx + rx) / max) * drivePower);
-            BL.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
-            FR.setPower(((adjustedLy + adjustedLx + rx) / max) * drivePower);
-            FL.setPower(((adjustedLy - adjustedLx - rx) / max) * drivePower);
+            double power = ((adjustedLy - adjustedLx + rx) / max) * drivePower;
+
+            bR.setPower(power);
+            bL.setPower(power);
+            fR.setPower(power);
+            fL.setPower(power);
             //what the sigma - Joel
+//
+//            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+//            double x = gamepad1.left_stick_x;
+//            double rx = gamepad1.right_stick_x;
+//
+//            // This button choice was made so that it is hard to hit on accident,
+//            // it can be freely changed based on preference.
+//            // The equivalent button is start on Xbox-style controllers.
+//            if (gamepad1.options) {
+//                imu.resetYaw();
+//            }
+//
+//            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+//
+//            // Rotate the movement direction counter to the bot's rotation
+//            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+//            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+//
+//            rotX = rotX * 1.1;  // Counteract imperfect strafing
+//
+//            // Denominator is the largest motor power (absolute value) or 1
+//            // This ensures all the powers maintain the same ratio,
+//            // but only if at least one is out of the range [-1, 1]
+//            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+//            double frontLeftPower = (rotY + rotX + rx) / denominator;
+//            double backLeftPower = (rotY - rotX + rx) / denominator;
+//            double frontRightPower = (rotY - rotX - rx) / denominator;
+//            double backRightPower = (rotY + rotX - rx) / denominator;
+//
+//            bL.setPower(backLeftPower);
+//            fL.setPower(frontLeftPower);
+//            bR.setPower(backRightPower);
+//            fR.setPower(frontRightPower);
 
-            // lifts
-            if (Math.abs(gamepad2.left_stick_y) > .2) {
-                lift1.setPower(gamepad2.left_stick_y *1);
-                lift2.setPower(gamepad2.left_stick_y *1);
+            // arm
+            if (Math.abs(gamepad2.right_stick_x) > .2) {
+                arm.setPower(gamepad2.right_stick_y *1);
                 while (gamepad2.right_bumper) {
-                    lift1.setPower(gamepad2.left_stick_y *.50);
-                    lift2.setPower(gamepad2.left_stick_y *.50);
+                    arm.setPower(gamepad2.right_stick_x *.50);
 
-                    BR.setPower(((adjustedLy - adjustedLx + rx) / max) * drivePower);
-                    BL.setPower(((adjustedLy + adjustedLx - rx) / max) * drivePower);
-                    FR.setPower(((adjustedLy + adjustedLx + rx) / max) * drivePower);
-                    FL.setPower(((adjustedLy - adjustedLx - rx) / max) * drivePower);
+                    bR.setPower(power);
+                    bL.setPower(power);
+                    fR.setPower(power);
+                    fL.setPower(power);
                 }
             } else {
-                lift1.setPower(0);
-                lift2.setPower(0);
-            }
-            if (gamepad2.dpad_up) {
-                slide1.setPosition(.53);// down positions
-                slide2.setPosition(.88); // opposite of 1 and .1 off
-            }
-            if (gamepad2.dpad_right) {
-                slide1.setPosition(.34); // up positions
-                slide2.setPosition(1);
-                Srotate.setPosition(.5);
-                Srotate2.setPosition(.5);
+                arm.setPower(0);
             }
 
-            if (gamepad2.left_bumper) {
-                bucket.setPosition(1);
+            //wrist
+            if (Math.abs(gamepad2.left_stick_y) > .2) {
+                wrist.setPower(gamepad2.left_stick_y * 1);
+                while (gamepad2.right_bumper) {
+                    wrist.setPower(gamepad2.left_stick_y *.50);
+
+                    bR.setPower(power);
+                    bL.setPower(power);
+                    fR.setPower(power);
+                    fL.setPower(power);
+                }
             } else {
-                bucket.setPosition(.6);
+                wrist.setPower(0);
             }
+
+            //claw
             if (gamepad2.a) {
-                claw.setPosition(.3); // grab
+                leftClaw.setPosition(0);//open
+                rightClaw.setPosition(0);
+            } else {
+                leftClaw.setPosition(0.5);//close
+                rightClaw.setPosition(0.5);
             }
+
+            //clip
             if (gamepad2.x) {
-                claw.setPosition(0); //open
-            }
-            if (gamepad2.b) {
-                intake.setPosition(.75 ); //close
-            }
-            if (gamepad2.y) {
-                intake.setPosition(.5); //open
-            }
-            if (gamepad2.dpad_left) {
-                Srotate.setPosition(1);
-                Srotate2.setPosition(0);
-            }
-            if (gamepad2.dpad_down) {
-                Srotate.setPosition(.4);
-                Srotate2.setPosition(.6);
-            }
-            if (gamepad1.right_bumper) {
-                lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                leftClip.setPosition(0);//up
+                rightClip.setPosition(0);
+            } else {
+                leftClip.setPosition(0.5);//down
+                rightClip.setPosition(0.5);
             }
         }
     }
