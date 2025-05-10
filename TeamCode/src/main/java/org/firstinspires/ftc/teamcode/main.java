@@ -163,11 +163,11 @@ public class main extends LinearOpMode {
 
             //clip
             if (gamepad2.x) {
-                leftClip.setPosition(0);//down
-                rightClip.setPosition(0);
-            } else {
                 leftClip.setPosition(0.5);//up
                 rightClip.setPosition(0.5);
+            } else {
+                leftClip.setPosition(0);//down
+                rightClip.setPosition(0);
             }
         }
     }
