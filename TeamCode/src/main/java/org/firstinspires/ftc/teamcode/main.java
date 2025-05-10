@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp
 public class main extends LinearOpMode {
-    RevBlinkinLedDriver Lights;
+
     DcMotor arm, fR, fL, bL, bR, wrist;
     Servo leftClaw, rightClaw, leftClip, rightClip;
     BNO055IMU imu;
