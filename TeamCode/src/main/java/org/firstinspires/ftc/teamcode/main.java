@@ -154,8 +154,8 @@ public class main extends LinearOpMode {
 
             //claw
             if (gamepad2.a) {
-                leftClaw.setPosition(0.5);//close
-                rightClaw.setPosition(0.5);
+                leftClaw.setPosition(0);//close
+                rightClaw.setPosition(0);
             } else {
                 leftClaw.setPosition(0.5);//open
                 rightClaw.setPosition(0.5);
